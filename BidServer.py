@@ -23,9 +23,9 @@ app = Flask(__name__)
 
 app.config.update(
     UPLOAD_FOLDER = 'uploads',
-    MAX_CONTENT_LENGTH = 16 * 1024 * 1024
-    DATABASE = 'BidServer.db3'
-    ALLOWED_EXTENSIONS = set(['zip'])
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024,
+    DATABASE = 'BidServer.db3',
+    ALLOWED_EXTENSIONS = set(['zip']),
 )
 
 
