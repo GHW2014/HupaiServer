@@ -35,7 +35,8 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
            
 
-def generate_sn():
+def generate_sn(msg):
+    
     fmt = '%Y-%m-%d %H:%M:%S %z'
 
     tm = '2017-09-01 00:00:00 +0000'
@@ -43,16 +44,15 @@ def generate_sn():
     random_generator = Random.new().read
     # rsa算法生成实例
     rsa = RSA.generate(1024, random_generator)
-    en="X3tJLPEBq6poWfDko5jq1+H2tu83ILtuFoImsqH0knrPW3WM3C/opeCVw8k39mIv5f4uqW5bVNTTNJm40zb6Oyelai3B2UgGxuip565mXgSvnj9DPmDHY05/N5Xcv0fz0A5TD2o8VWjmGmI/D2rbjHsvoGI78MMGKPNnbWFm9JM="
     text=""
     with open('hupaibid.pem') as f:
         key = f.read()
         rsakey = RSA.importKey(key)
         cipher = Cipher_pkcs1_v1_5.new(rsakey)
-        text = cipher.decrypt(base64.b64decode(en), random_generator)
+        text = cipher.decrypt(base64.b64decode(msg), random_generator)
         app.logger.debug(text)
 
-    message=text + b'1504224000' + str(timegm(datetime.strptime(tm, fmt).utctimetuple())).encode('utf-8')
+    #message=text + b'1504224000' + str(timegm(datetime.strptime(tm, fmt).utctimetuple())).encode('utf-8')
 
     message = "ASDSADSADSAFDSFADASFASFDAS".encode('utf-8')
     app.logger.debug(message)
@@ -67,7 +67,21 @@ def generate_sn():
         signature = base64.b64encode(sign)
         app.logger.debug(signature)
     return signature
-
+    
+def check_register(msg):
+    random_generator = Random.new().read
+    rsa = RSA.generate(1024, random_generator)
+    bid=''
+    exp=''
+    phone=''
+    with open('hupaibid.pem') as f:
+        key = f.read()
+        rsakey = RSA.importKey(key)
+        cipher = Cipher_pkcs1_v1_5.new(rsakey)
+        text = cipher.decrypt(base64.b64decode(msg), random_generator)
+        app.logger.debug(text)
+    return text.decode("utf-8")
+    
 
 def connect_db():
     """Connects to the specific database."""
@@ -111,25 +125,30 @@ def index():
     return render_template('index.html')
     
  
-@app.route('/reg', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        print(request.headers)
-        print(request.__dict__)
-        app.logger.debug(request.form.get('BidNumber'))
-        app.logger.debug(request.form.get('Id'))
-        app.logger.debug(request.form.get('Expired'))
-        return 'Hello World!'
-    else:
-        return 'Hello Worlda!'
-
         
 @app.route('/register', methods=['POST'])
 def register():
-    app.logger.debug(request.form.get('MSG', default='little apple'))
-    generate_sn()
-    return 'http://127.0.0.1:5000/static/qrcode/01/0101.png'
-        
+    request.get_data(parse_form_data=False, cache=True)
+    bid = request.form.get('BidNumber', default='0')
+    msg = request.form.get('Msg', default='').replace(' ','+')
+    result = check_register(msg)
+    url = 'http://127.0.0.1:5000/static/qrcode/pay.png'
+    if bid in result and len(result.split('#')) == 3:
+        app.logger.debug("BID CHECK PASS")
+        number = result.split('#')[0]
+        mouth  = result.split('#')[1]
+        phone  = result.split('#')[2]
+        if mouth == '0':
+            url = 'http://127.0.0.1:5000/static/qrcode/1001.png'
+        elif mouth == '1':
+            url = 'http://127.0.0.1:5000/static/qrcode/2001.png'
+        elif mouth == '2':
+            url = 'http://127.0.0.1:5000/static/qrcode/3001.png'
+        elif mouth == '3':
+            url = 'http://127.0.0.1:5000/static/qrcode/4001.png'
+
+    return url
+   
 
 @app.route('/upload', methods=['POST'])
 def upload():

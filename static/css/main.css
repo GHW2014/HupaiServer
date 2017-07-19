@@ -565,7 +565,8 @@ section {
 }
 
 #team .img-responsive {
-  width: 100%;
+  width: 50%;
+  text-align: center;
 }
 
 .member-info h3 {
@@ -855,10 +856,6 @@ section {
   padding-bottom: 0;
 }
 
-#google-map {
-  height: 350px;
-}
-
 #contact-us {
   background-image:url(../images/contact-bg.jpg);
   padding-bottom: 90px; 
@@ -866,6 +863,12 @@ section {
 
 #contact-us .heading {
   padding-top: 95px;
+}
+
+#contact .img-responsive {
+  width: 30%;
+  display: block;
+    margin: 0 auto;
 }
 
 .form-control {
